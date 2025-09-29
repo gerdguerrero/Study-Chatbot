@@ -1,8 +1,9 @@
 # AI Study Chatbot Requirements
 # Real OpenAI integration with RAG capabilities for PDF processing
+# Updated for GPT-4 and latest embedding models
 
 # Core AI & NLP
-openai>=1.3.0
+openai>=1.40.0
 tiktoken>=0.5.0
 
 # RAG & Vector Database

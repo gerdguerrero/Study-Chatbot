@@ -11,12 +11,23 @@ from pydantic_settings import BaseSettings
 load_dotenv()
 
 class Settings(BaseSettings):
-    """Application settings and configuration"""
+    """
+    Application settings and configuration
+    
+    Model Information:
+    - GPT-4: Most advanced reasoning, better at complex academic content (higher cost)
+    - GPT-4-turbo: Faster GPT-4 with larger context window
+    - GPT-3.5-turbo: Cost-effective option with good performance
+    - text-embedding-3-large: Latest embedding model with best semantic understanding
+    - text-embedding-ada-002: Cost-effective embedding option
+    
+    Note: When GPT-5 becomes available, update openai_model to "gpt-5"
+    """
     
     # OpenAI Configuration
     openai_api_key: str = os.getenv("OPENAI_API_KEY", "")
-    openai_model: str = "gpt-3.5-turbo"
-    openai_embedding_model: str = "text-embedding-ada-002"
+    openai_model: str = os.getenv("OPENAI_MODEL", "gpt-4")  # Using GPT-4 for best performance
+    openai_embedding_model: str = os.getenv("OPENAI_EMBEDDING_MODEL", "text-embedding-3-large")  # Latest embedding model
     
     # RAG Configuration
     chroma_persist_directory: str = "./embeddings"
@@ -32,7 +43,7 @@ class Settings(BaseSettings):
     # Chatbot Settings
     max_history_length: int = 10
     temperature: float = 0.7
-    max_tokens: int = 1000
+    max_tokens: int = 2000  # Increased for GPT-4's better capabilities
     
     # Exam Generation
     default_exam_questions: int = 5
