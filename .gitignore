@@ -1,0 +1,114 @@
+# AI Study Chatbot - Git Ignore File
+
+# Environment Variables
+.env
+*.env
+.env.local
+.env.production
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# PyInstaller
+*.manifest
+*.spec
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+cover/
+
+# Virtual environments
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+.venv/
+
+# IDEs and editors
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Vector Database (ChromaDB)
+embeddings/
+chroma_db/
+*.sqlite3
+
+# Temporary files
+temp/
+tmp/
+*.tmp
+*.temp
+
+# Document uploads (optional - you may want to include some sample docs)
+documents/*.pdf
+documents/*.docx
+documents/*.txt
+
+# Streamlit cache
+.streamlit/
+
+# Jupyter Notebooks
+.ipynb_checkpoints/
+
+# MacOS
+.DS_Store
+
+# Windows
+desktop.ini
+
+# Large files
+*.zip
+*.tar.gz
+*.rar
