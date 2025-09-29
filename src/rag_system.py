@@ -48,14 +48,60 @@ class RAGSystem:
             settings=ChromaSettings(anonymized_telemetry=False)
         )
         
-        # Initialize vector store
-        self.vector_store = Chroma(
-            client=self.chroma_client,
-            collection_name="study_documents",
-            embedding_function=self.embeddings
-        )
+        # Initialize vector store with dimension compatibility check
+        try:
+            self.vector_store = Chroma(
+                client=self.chroma_client,
+                collection_name="study_documents",
+                embedding_function=self.embeddings
+            )
+        except Exception as e:
+            # If there's a dimension mismatch, reset the collection
+            if "dimension" in str(e).lower():
+                logger.warning(f"Embedding dimension mismatch detected: {e}")
+                logger.info("Resetting vector database to match new embedding model...")
+                self._reset_collection()
+                self.vector_store = Chroma(
+                    client=self.chroma_client,
+                    collection_name="study_documents",
+                    embedding_function=self.embeddings
+                )
+            else:
+                raise e
         
         logger.info("RAG system initialized successfully")
+    
+    def _reset_collection(self):
+        """Reset the ChromaDB collection to handle embedding dimension changes"""
+        try:
+            # Try to delete the existing collection
+            try:
+                collection = self.chroma_client.get_collection("study_documents")
+                self.chroma_client.delete_collection("study_documents")
+                logger.info("Deleted existing collection with incompatible dimensions")
+            except Exception:
+                # Collection doesn't exist or already deleted
+                pass
+            
+            # Clear any persistent data
+            import shutil
+            import os
+            if os.path.exists(self.settings.chroma_persist_directory):
+                try:
+                    shutil.rmtree(self.settings.chroma_persist_directory)
+                    os.makedirs(self.settings.chroma_persist_directory, exist_ok=True)
+                    logger.info("Cleared ChromaDB persistent directory")
+                except Exception as e:
+                    logger.warning(f"Could not clear persistent directory: {e}")
+            
+            # Reinitialize the client
+            self.chroma_client = chromadb.PersistentClient(
+                path=self.settings.chroma_persist_directory,
+                settings=ChromaSettings(anonymized_telemetry=False)
+            )
+            
+        except Exception as e:
+            logger.error(f"Error resetting collection: {e}")
     
     def _clean_metadata(self, metadata: Dict) -> Dict:
         """Clean metadata to contain only simple types that ChromaDB can handle"""
@@ -94,7 +140,27 @@ class RAGSystem:
                 cleaned_docs.append(cleaned_doc)
             
             # Add cleaned documents to vector store
-            self.vector_store.add_documents(cleaned_docs)
+            try:
+                self.vector_store.add_documents(cleaned_docs)
+            except Exception as e:
+                # Handle dimension mismatch by resetting collection
+                if "dimension" in str(e).lower():
+                    logger.warning(f"Embedding dimension mismatch: {e}")
+                    logger.info("Resetting vector database and retrying...")
+                    self._reset_collection()
+                    
+                    # Recreate vector store
+                    self.vector_store = Chroma(
+                        client=self.chroma_client,
+                        collection_name="study_documents",
+                        embedding_function=self.embeddings
+                    )
+                    
+                    # Retry adding documents
+                    self.vector_store.add_documents(cleaned_docs)
+                    logger.info("Successfully added documents after collection reset")
+                else:
+                    raise e
             
             # Log sample of what was added for debugging
             if cleaned_docs:
